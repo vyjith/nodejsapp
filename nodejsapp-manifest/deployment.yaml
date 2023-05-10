@@ -16,4 +16,4 @@ spec:
       - name: myapp
         image: vyjith/nodeapp_testnew:replaceImageTag
         ports:
-        - containerPort: 8080
+        - containerPort: 3000
