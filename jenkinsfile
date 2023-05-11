@@ -1,11 +1,11 @@
 pipeline{
 
-	agent {label 'jenkins-slave'}
-
+	agent any
 	environment {
-		DOCKERHUB_CREDENTIALS=credentials('jenkins')
+		DOCKERHUB_CREDENTIALS=credentials('vyjith-id')
 	}
 
+	
 	stages {
 	    
 	    stage('gitclone') {
@@ -18,7 +18,7 @@ pipeline{
 		stage('Build') {
 
 			steps {
-				sh 'docker build -t vyjith/nodeapp_test:latest .'
+				sh 'docker build -t vyjith/nodeapp_testnew:${BUILD_NUMBER} .'
 			}
 		}
 
@@ -32,15 +32,40 @@ pipeline{
 		stage('Push') {
 
 			steps {
-				sh 'docker push vyjith/nodeapp_test:latest'
+				sh 'docker push vyjith/nodeapp_testnew:${BUILD_NUMBER}'
 			}
 		}
-	}
+		stage('Update Deployment File') {
+        environment {
+            GIT_REPO_NAME = "nodejsapp"
+            GIT_USER_NAME = "vyjith"
+        }
+        steps {
+            withCredentials([string(credentialsId: 'Git-hub', variable: 'GITHUB_TOKEN')]) {
+                sh '''
+		    rm -rf nodejsapp-new/deployment.yaml
+                    git config user.email "vyjithks@gmail.com"
+                    git config user.name "vyjith"
+                    BUILD_NUMBER=${BUILD_NUMBER}
+		    cp -av nodejsapp-manifest/deployment.yaml nodejsapp-new/
+                    sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" nodejsapp-new/deployment.yaml
+                    git add nodejsapp-new/deployment.yaml
+                    git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:master
+                '''
+            }
+        }
+    }
+		
 
-	post {
+	}
+	
+		post {
 		always {
 			sh 'docker logout'
 		}
 	}
-
 }
+	
+
+
