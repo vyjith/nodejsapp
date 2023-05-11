@@ -5,7 +5,9 @@ metadata:
 spec:
   selector:
     app: myapp
+  type: NodePort
   ports:
   - port: 3000
     protocol: TCP
     targetPort: 3000
+    nodePort: 30036
