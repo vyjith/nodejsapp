@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: myapp
-        image: vyjith/nodeapp_testnew:19
+        image: vyjith/nodeapp_testnew:20
         ports:
         - containerPort: 3000
